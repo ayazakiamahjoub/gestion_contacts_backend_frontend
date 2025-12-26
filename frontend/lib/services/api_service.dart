@@ -272,6 +272,36 @@ class ApiService {
       throw Exception('Erreur lors de la mise à jour');
     }
   }
+  // Recherche de contacts
+static Future<List<dynamic>> searchContacts(String query) async {
+  print('🔍 Recherche de contacts: $query');
+  
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/contacts/search/$query'),
+      headers: _headers,
+    ).timeout(const Duration(seconds: 10));
+    
+    print('📊 Search Status: ${response.statusCode}');
+    print('📄 Search Response: ${response.body}');
+    
+    if (response.statusCode == 200) {
+      final results = jsonDecode(response.body);
+      print('✅ ${results.length} contacts trouvés');
+      return results;
+    } else if (response.statusCode == 401) {
+      throw Exception('Non autorisé - Token invalide');
+    } else if (response.statusCode == 404) {
+      print('ℹ️ Aucun contact trouvé pour "$query"');
+      return [];
+    } else {
+      throw Exception('Erreur lors de la recherche: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('❌ Exception dans searchContacts: $e');
+    rethrow;
+  }
+}
 
   static Future<void> deleteContact(int contactId) async {
     print('🗑️ Suppression du contact $contactId');
